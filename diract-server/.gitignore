@@ -38,13 +38,19 @@ out/
 
 # Firebase
 src/main/resources/firebase-key.json
-src/main/resources/firebase-key.json
+firebase-key.json
+.firebaserc
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
 
-# Node.js (스크립트 관련)
+# Firebase Emulator
+emulator-data/
+.firebase/
+firebase.json
+
+# Node.js
 node_modules/
 package.json
 package-lock.json
 extract-schema.js
-
-# Firebase 백업 데이터 (혹시 export 했을 경우)
-firestore-backup/
