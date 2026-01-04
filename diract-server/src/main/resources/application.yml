@@ -1,6 +1,41 @@
 spring:
   application:
     name: diract
+  profiles:
+    active: local
 
 server:
   port: 8080
+
+---
+# Local 환경 - Firestore Emulator 사용
+spring:
+  config:
+    activate:
+      on-profile: local
+
+firebase:
+  emulator:
+    enabled: true
+
+---
+## Dev 환경 - 실제 Firebase 사용
+#spring:
+#  config:
+#    activate:
+#      on-profile: dev
+#
+#firebase:
+#  emulator:
+#    enabled: false
+#
+#---
+## Prod 환경 - 실제 Firebase 사용
+#spring:
+#  config:
+#    activate:
+#      on-profile: prod
+#
+#firebase:
+#  emulator:
+#    enabled: false
