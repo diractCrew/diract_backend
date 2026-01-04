@@ -35,3 +35,22 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Firebase
+src/main/resources/firebase-key.json
+firebase-key.json
+.firebaserc
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# Firebase Emulator
+emulator-data/
+.firebase/
+firebase.json
+
+# Node.js
+node_modules/
+package.json
+package-lock.json
+extract-schema.js
