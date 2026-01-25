@@ -3,6 +3,7 @@ package com.diract.domain.user.service;
 import com.diract.domain.user.entity.User;
 import com.diract.domain.user.repository.UserRepository;
 import com.google.cloud.Timestamp;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -120,5 +121,9 @@ public class UserService {
         } while (userRepository.existsById(userId));
 
         return userId;
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAllNotDeleted();
     }
 }
