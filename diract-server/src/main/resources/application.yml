@@ -2,16 +2,16 @@ spring:
   application:
     name: diract
   profiles:
-    active: local
+    active: ${SPRING_PROFILES_ACTIVE:local}
 
 server:
   port: 8080
 
 # JWT 설정
 jwt:
-  secret: your-secret-key-at-least-256-bits-long-change-this-in-production-please
-  access-token-expiration: 3600000      # 1시간
-  refresh-token-expiration: 1209600000  # 2주
+  secret: ${JWT_SECRET:your-secret-key-at-least-256-bits-long-change-this-in-production-please}
+  access-token-expiration: 3600000
+  refresh-token-expiration: 1209600000
 
 # OAuth 설정
 oauth:
@@ -25,6 +25,22 @@ oauth:
     token-uri: https://appleid.apple.com/auth/token
     public-key-uri: https://appleid.apple.com/auth/keys
 
+# Firebase 공통 설정
+firebase:
+  project-id: ${FIREBASE_PROJECT_ID:dancemachine-5943b}
+
+  credentials:
+    path: ${GOOGLE_APPLICATION_CREDENTIALS:}
+
+  emulator:
+    enabled: ${FIREBASE_EMULATOR_ENABLED:false}
+    firestore-host: ${FIRESTORE_EMULATOR_HOST:localhost:8081}
+
+logging:
+  level:
+    org.springframework.security: INFO
+
+
 ---
 # Local 환경
 spring:
@@ -35,6 +51,40 @@ spring:
 firebase:
   emulator:
     enabled: true
+  credentials:
+    path: ""
 
 jwt:
   secret: diract-jwt-secret-2026-local-dev-prod-safe-key-please-change-this-before-production-9f3a7c2b1d8e4a6f
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+
+---
+# Dev 환경
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+firebase:
+  emulator:
+    enabled: false
+
+
+---
+# Prod 환경
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+firebase:
+  emulator:
+    enabled: false
+
+logging:
+  level:
+    org.springframework.security: INFO

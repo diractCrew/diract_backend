@@ -6,6 +6,8 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteResult;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -104,4 +106,34 @@ public class UserRepository {
     public boolean existsByEmail(String email) {
         return findByEmail(email).isPresent();
     }
+
+    /**
+     * 전체 사용자 조회 (Soft Delete 제외)
+     * - deletedAt 이 null(또는 필드 없음)인 사용자만 반환
+     */
+    public List<User> findAllNotDeleted() {
+        try {
+            ApiFuture<QuerySnapshot> future = firestore
+                .collection(COLLECTION_NAME)
+                .whereEqualTo("deletedAt", null)
+                .get();
+
+            QuerySnapshot querySnapshot = future.get();
+
+            List<User> users = new ArrayList<>();
+            querySnapshot.getDocuments().forEach(doc -> {
+                User user = doc.toObject(User.class);
+                if (user != null) {
+                    users.add(user);
+                }
+            });
+
+            return users;
+
+        } catch (InterruptedException | ExecutionException e) {
+            log.error("전체 사용자 조회 실패", e);
+            throw new RuntimeException("전체 사용자 조회 중 오류 발생", e);
+        }
+    }
+
 }

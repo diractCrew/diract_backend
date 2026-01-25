@@ -4,6 +4,7 @@ import com.diract.domain.user.dto.UserResponse;
 import com.diract.domain.user.dto.UserUpdateRequest;
 import com.diract.domain.user.entity.User;
 import com.diract.domain.user.service.UserService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -78,4 +79,17 @@ public class UserController {
     }
 
     public record DeleteResponse(boolean success, String message) {}
+
+    /** 전체 사용자 조회 (Soft Delete 제외) */
+    @GetMapping
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        log.info("전체 사용자 조회 요청");
+
+        List<UserResponse> users = userService.getAllUsers()
+            .stream()
+            .map(UserResponse::from)
+            .toList();
+
+        return ResponseEntity.ok(users);
+    }
 }

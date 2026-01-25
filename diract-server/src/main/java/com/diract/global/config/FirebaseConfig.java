@@ -2,6 +2,7 @@ package com.diract.global.config;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.FirestoreOptions;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
@@ -9,65 +10,77 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 
-import javax.annotation.PostConstruct;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Firebase Admin SDK 초기화 설정
- *
- * - Firestore 사용을 위한 FirebaseApp 초기화
- * - 로컬 환경에서는 Firestore Emulator 사용
- * - 그 외 환경에서는 실제 Firebase 프로젝트 연결
- */
-@Slf4j
 @Configuration
+@Slf4j
 public class FirebaseConfig {
+
+    @Value("${firebase.project-id:dancemachine-5943b}")
+    private String projectId;
 
     @Value("${firebase.emulator.enabled:false}")
     private boolean emulatorEnabled;
 
-    /**
-     * Firebase 초기화
-     *
-     * - Emulator 사용 시 FIRESTORE_EMULATOR_HOST 설정
-     * - 서비스 계정 키(firebase-key.json)를 이용해 FirebaseApp 초기화
-     */
-    @PostConstruct
-    public void initialize() throws IOException {
-        try {
-            if (emulatorEnabled) {
-                System.setProperty("FIRESTORE_EMULATOR_HOST", "localhost:8081");
-                log.info("Firestore Emulator enabled (localhost:8081)");
+    @Value("${firebase.emulator.firestore-host:localhost:8081}")
+    private String emulatorHost;
+
+    @Value("${firebase.credentials.path:}")
+    private String credentialsPath;
+
+    @Bean
+    public FirebaseApp firebaseApp() throws IOException {
+        FirebaseOptions.Builder builder = FirebaseOptions.builder()
+            .setProjectId(projectId);
+
+        // firebase-admin 9.2.0은 credentials 없으면 build()에서 NPE 남
+        // 그래서 emulator에서도 "형식상" credentials를 넣어줘야 함
+        GoogleCredentials credentials;
+
+        if (!emulatorEnabled) {
+            // dev/prod: 서비스계정키 또는 ADC
+            if (credentialsPath != null && !credentialsPath.isBlank()) {
+                try (InputStream in = new FileInputStream(credentialsPath)) {
+                    credentials = GoogleCredentials.fromStream(in);
+                }
+            } else {
+                credentials = GoogleCredentials.getApplicationDefault();
             }
-
-            // Firebase 서비스 계정 키 로드
-            InputStream serviceAccount =
-                new ClassPathResource("firebase-key.json").getInputStream();
-
-            FirebaseOptions options = FirebaseOptions.builder()
-                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .build();
-
-            // FirebaseApp은 JVM 당 한 번만 초기화
-            if (FirebaseApp.getApps().isEmpty()) {
-                FirebaseApp.initializeApp(options);
-                log.info("Firebase initialized (emulatorEnabled={})", emulatorEnabled);
-            }
-
-        } catch (IOException e) {
-            log.error("Firebase initialization failed", e);
-            throw e;
+        } else {
+            // local emulator: 더미 credentials
+            credentials = GoogleCredentials.create(null);
         }
+
+        builder.setCredentials(credentials);
+
+        FirebaseOptions options = builder.build();
+
+        if (FirebaseApp.getApps().isEmpty()) {
+            FirebaseApp.initializeApp(options);
+        }
+
+        log.info("Firebase initialized. projectId={}, emulator={}", projectId, emulatorEnabled);
+        return FirebaseApp.getInstance();
     }
 
-    /**
-     * Firestore Bean 등록
-     */
     @Bean
-    public Firestore firestore() {
-        return FirestoreClient.getFirestore();
+    public Firestore firestore(FirebaseApp firebaseApp) {
+        if (emulatorEnabled) {
+            // 여기서 에뮬레이터로 강제 연결되므로 실프로젝트로 안 나감
+            log.info("Using Firestore Emulator: {}", emulatorHost);
+
+            return FirestoreOptions.newBuilder()
+                .setProjectId(projectId)
+                .setHost(emulatorHost)
+                .setCredentials(GoogleCredentials.create(null))
+                .build()
+                .getService();
+        }
+
+        log.info("Using Firestore Production");
+        return FirestoreClient.getFirestore(firebaseApp);
     }
 }

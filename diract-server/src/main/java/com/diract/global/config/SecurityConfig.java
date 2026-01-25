@@ -2,6 +2,7 @@ package com.diract.global.config;
 
 import com.diract.auth.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -42,8 +43,11 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // 인증 없이 접근 가능한 엔드포인트
                 .requestMatchers(
+                    "/error",
                     "/api/auth/**",
-                    "/actuator/health"
+                    "/health",
+                    "/api/users",
+                    "/api/users/**"
                 ).permitAll()
 
                 // 그 외 요청은 인증 필요
