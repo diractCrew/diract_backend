@@ -17,7 +17,7 @@ public class GoogleUserInfo {
     /**
      * Google 사용자 고유 ID
      */
-    @JsonProperty("id")
+    @JsonProperty("sub")
     private String id;
 
     /**
