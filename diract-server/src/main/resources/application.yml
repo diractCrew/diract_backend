@@ -7,8 +7,26 @@ spring:
 server:
   port: 8080
 
+# JWT 설정
+jwt:
+  secret: your-secret-key-at-least-256-bits-long-change-this-in-production-please
+  access-token-expiration: 3600000      # 1시간
+  refresh-token-expiration: 1209600000  # 2주
+
+# OAuth 설정
+oauth:
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:your-google-client-id}
+  apple:
+    client-id: ${APPLE_CLIENT_ID:your-apple-client-id}
+    team-id: ${APPLE_TEAM_ID:your-apple-team-id}
+    key-id: ${APPLE_KEY_ID:your-apple-key-id}
+    redirect-uri: ${APPLE_REDIRECT_URI:http://localhost:8080/api/auth/apple/callback}
+    token-uri: https://appleid.apple.com/auth/token
+    public-key-uri: https://appleid.apple.com/auth/keys
+
 ---
-# Local 환경 - Firestore Emulator 사용
+# Local 환경
 spring:
   config:
     activate:
@@ -18,24 +36,5 @@ firebase:
   emulator:
     enabled: true
 
----
-## Dev 환경 - 실제 Firebase 사용
-#spring:
-#  config:
-#    activate:
-#      on-profile: dev
-#
-#firebase:
-#  emulator:
-#    enabled: false
-#
-#---
-## Prod 환경 - 실제 Firebase 사용
-#spring:
-#  config:
-#    activate:
-#      on-profile: prod
-#
-#firebase:
-#  emulator:
-#    enabled: false
+jwt:
+  secret: diract-jwt-secret-2026-local-dev-prod-safe-key-please-change-this-before-production-9f3a7c2b1d8e4a6f
