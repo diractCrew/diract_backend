@@ -34,7 +34,7 @@ public class AuthController {
      */
     @PostMapping("/login/google")
     public ResponseEntity<JwtToken> googleLogin(
-        @RequestParam String idToken
+        @RequestBody String idToken
     ) {
         log.info("Google 로그인 요청");
 
@@ -50,7 +50,7 @@ public class AuthController {
      */
     @PostMapping("/login/apple")
     public ResponseEntity<JwtToken> appleLogin(
-        @RequestParam String identityToken
+        @RequestBody String identityToken
     ) {
         log.info("Apple 로그인 요청");
 
@@ -66,7 +66,7 @@ public class AuthController {
      */
     @PostMapping("/refresh")
     public ResponseEntity<JwtToken> refresh(
-        @RequestParam String refreshToken
+        @RequestBody String refreshToken
     ) {
         log.info("Access Token 재발급 요청");
 
@@ -81,7 +81,7 @@ public class AuthController {
      */
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(
-        @RequestParam String refreshToken
+        @RequestBody String refreshToken
     ) {
         log.info("로그아웃 요청");
 
